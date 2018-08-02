@@ -43,6 +43,9 @@ module PgSync
           end
         end
 
+        to_connection.exec("ALTER TABLE #{quote_ident_full(table)} DISABLE TRIGGER ALL")
+
+
         if shared_fields.any?
           copy_fields = shared_fields.map { |f| f2 = bad_fields.to_a.find { |bf, bk| rule_match?(table, f, bf) }; f2 ? "#{apply_strategy(f2[1], table, f)} AS #{quote_ident(f)}" : "#{quote_ident_full(table)}.#{quote_ident(f)}" }.join(", ")
           fields = shared_fields.map { |f| quote_ident(f) }.join(", ")
@@ -149,6 +152,8 @@ module PgSync
             to_connection.exec("SELECT setval(#{escape(seq)}, #{escape(value)})")
           end
         end
+        to_connection.exec("ALTER TABLE #{quote_ident_full(table)} ENABLE TRIGGER ALL")
+
         mutex.synchronize do
           log "* DONE #{table_name} (#{(Time.now - start_time).round(1)}s)"
         end
