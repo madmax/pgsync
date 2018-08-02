@@ -56,11 +56,8 @@ module PgSync
           end
 
           copy_to_command = "COPY (SELECT #{copy_fields} FROM #{quote_ident_full(table)}#{sql_clause}) TO STDOUT"
-          if opts[:in_batches]
+          if opts[:in_batches] && primary_key = source.primary_key(table)
             raise PgSync::Error, "Cannot use --overwrite with --in-batches" if opts[:overwrite]
-
-            primary_key = source.primary_key(table)
-            raise PgSync::Error, "No primary key" unless primary_key
 
             destination.truncate(table) if opts[:truncate]
 
