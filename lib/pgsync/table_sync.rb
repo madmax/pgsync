@@ -56,7 +56,8 @@ module PgSync
           end
 
           copy_to_command = "COPY (SELECT #{copy_fields} FROM #{quote_ident_full(table)}#{sql_clause}) TO STDOUT"
-          if opts[:in_batches] && primary_key = source.primary_key(table)
+
+          if opts[:in_batches] && !skip_batches?(config, table_name) && primary_key = source.primary_key(table)
             raise PgSync::Error, "Cannot use --overwrite with --in-batches" if opts[:overwrite]
 
             destination.truncate(table) if opts[:truncate]
@@ -161,6 +162,10 @@ module PgSync
     end
 
     private
+
+    def skip_batches?(config, table_name)
+      config.fetch("skip_batches", []).include?(table_name)
+    end
 
     # TODO better performance
     def rule_match?(table, column, rule)
