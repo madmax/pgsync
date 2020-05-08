@@ -99,7 +99,7 @@ module PgSync
                 sleep(opts[:sleep])
               end
             end
-          elsif !opts[:truncate] && (opts[:overwrite] || opts[:preserve] || !sql_clause.empty?)
+          elsif !opts[:truncate] && (opts[:overwrite] || opts[:preserve] || !sql_clause.empty? || skip_batches?(config, table_name))
             primary_key = destination.primary_key(table)
             raise PgSync::Error, "No primary key" unless primary_key
 
